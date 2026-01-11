@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Кредитный калькулятор</title>
+    <meta charset="utf-8">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #D3D3D3;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+        }
+        .calculator {
+            background: #A7EF67;
+            padding: 20px;
+            border: 2px solid black;
+            border-radius: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 2px solid black;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+        .results {
+            font-weight: bold;
+            margin-top: 20px;
+            padding: 15px;
+            background: #90ccf7;
+            border: 2px solid black;
+            border-radius: 10px;
+        }
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+        }
+    </style>
+</head>
+<body>
+<div id="app" class="container">
+    <div class="calculator">
+        <h2>Кредитный калькулятор</h2>
+        <div class="form-group">
+            <label>Сумма кредита</label>
+            <input type="number" v-model.number="summa">
+            <select v-model="currency">
+                <option>₽</option>
+                <option>$</option>
+                <option>€</option>
+                <option>£</option>
+                <option>¥</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Первоначальный взнос</label>
+            <input type="number" v-model.number="initialPayment">
+        </div>
+        <div class="form-group">
+            <label>Срок кредита</label>
+            <input type="number" v-model.number="srok">
+            <select v-model="srok_ed">
+                <option value="months">Месяцы</option>
+                <option value="years">Годы</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Процентная ставка</label>
+            <input type="number" v-model.number="percent">
+            <select v-model="percent_ed">
+                <option value="year">% в год</option>
+                <option value="month">% в месяц</option>
+                <option value="day">% в день</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Дополнительные комиссии</label>
+            <input type="number" v-model.number="fees">
+        </div>
+        <div class="form-group">
+            <label>Тип платежа</label>
+            <select v-model="paymentType">
+                <option value="annuity">Аннуитетный</option>
+                <option value="differentiated">Дифференцированный</option>
+            </select>
+        </div>
+        <div class="results">
+            <div class="result-item"><span>Ежемесячный платеж:</span><span>{{ monthlyPayment }} {{ currency }}</span></div>
+            <div class="result-item"><span>Общая сумма выплат:</span><span>{{ totalPayment }} {{ currency }}</span></div>
+            <div class="result-item"><span>Переплата:</span><span>{{ overpay }} {{ currency }}</span></div>
+        </div>
+    </div>
+</div>
+<script src="vue_global.js"></script>
+<script>
+    Vue.createApp({
+        data() {
+            return {
+                summa: 100000,
+                initialPayment: 0,
+                srok: 24,
+                percent: 20,
+                fees: 0,
+                currency: '₽',
+                srok_ed: 'months',
+                percent_ed: 'year',
+                paymentType: 'annuity',
+            };
+        },
+        computed: {
+            monthlyPayment() {
+                let p = this.percent / 100 / 12;
+                let loanAmount = this.summa - this.initialPayment + this.fees;
+
+                if (this.paymentType === 'annuity') {
+                    return ((loanAmount * p) / (1 - Math.pow(1 + p, -this.srok))).toFixed(2);
+                } else {
+
+                    let basePayment = loanAmount / this.srok;
+                    let firstPayment = basePayment + (loanAmount * p);
+                    return firstPayment.toFixed(2);
+                }
+            },
+            totalPayment() {
+                let total = 0;
+                let p = this.percent / 100 / 12;
+                let loanAmount = this.summa - this.initialPayment + this.fees;
+                if (this.paymentType === 'annuity') {
+                    total = this.monthlyPayment * this.srok;
+                } else {
+                    let remainingLoan = loanAmount;
+                    for (let i = 0; i < this.srok; i++) {
+                        let interestPayment = remainingLoan * p;
+                        let principalPayment = loanAmount / this.srok;
+                        total += principalPayment + interestPayment;
+                        remainingLoan -= principalPayment;
+                    }
+                }
+                return total.toFixed(2);
+            },
+            overpay() {
+                return (this.totalPayment - (this.summa - this.initialPayment)).toFixed(2);
+            },
+        }
+    }).mount('#app');
+</script>
+</body>
+</html>

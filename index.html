@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
     <title>Кредитный калькулятор</title>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
         * {
             box-sizing: border-box;
@@ -14,12 +15,15 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             background-color: #D3D3D3;
+            padding: 15px;
         }
         .container {
             display: flex;
             gap: 20px;
+            width: 100%;
+            justify-content: center;
         }
         .calculator {
             background: #A7EF67;
@@ -49,6 +53,20 @@
             border-radius: 10px;
             font-size: 16px;
         }
+        .input-row {
+            display: flex;
+            gap: 8px;
+            align-items: stretch;
+        }
+        .input-row input {
+            flex: 1;
+            min-width: 0;
+        }
+        .input-row select {
+            width: auto;
+            min-width: 90px;
+            flex-shrink: 0;
+        }
         .results {
             font-weight: bold;
             margin-top: 20px;
@@ -62,6 +80,97 @@
             justify-content: space-between;
             padding: 5px 0;
         }
+        .schedule-section {
+            background: #A7EF67;
+            padding: 20px;
+            border: 2px solid black;
+            border-radius: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+        }
+        .schedule-section h3 {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .schedule-table-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border-radius: 10px;
+            border: 2px solid black;
+            background: #90ccf7;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        th {
+            background: #76b5e0;
+            padding: 8px 6px;
+            text-align: center;
+            font-weight: bold;
+            border-bottom: 2px solid black;
+            white-space: nowrap;
+        }
+        td {
+            padding: 6px;
+            text-align: center;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+        tr:nth-child(even) {
+            background: rgba(255,255,255,0.3);
+        }
+        .toggle-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-top: 15px;
+            background: #90ccf7;
+            border: 2px solid black;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .toggle-btn:hover {
+            background: #76b5e0;
+        }
+
+        @media (max-width: 860px) {
+            .container {
+                flex-direction: column;
+                align-items: center;
+            }
+            .calculator, .schedule-section {
+                max-width: 100%;
+            }
+        }
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+                align-items: flex-start;
+            }
+            .calculator, .schedule-section {
+                padding: 15px;
+                border-radius: 15px;
+            }
+            h2 {
+                font-size: 1.3rem;
+            }
+            .input-row {
+                gap: 6px;
+            }
+            input, select {
+                padding: 10px;
+                font-size: 16px;
+            }
+            .result-item {
+                flex-direction: column;
+                gap: 2px;
+                text-align: center;
+            }
+        }
     </style>
 </head>
 <body>
@@ -70,39 +179,55 @@
         <h2>Кредитный калькулятор</h2>
         <div class="form-group">
             <label>Сумма кредита</label>
-            <input type="number" v-model.number="summa">
-            <select v-model="currency">
-                <option>₽</option>
-                <option>$</option>
-                <option>€</option>
-                <option>£</option>
-                <option>¥</option>
-            </select>
+            <div class="input-row">
+                <input type="number" v-model.number="summa" min="0" step="1000">
+                <select v-model="currency">
+                    <option value="₽">₽</option>
+                    <option value="$">$</option>
+                    <option value="€">€</option>
+                    <option value="£">£</option>
+                    <option value="¥">¥</option>
+                </select>
+            </div>
         </div>
         <div class="form-group">
             <label>Первоначальный взнос</label>
-            <input type="number" v-model.number="initialPayment">
+            <div class="input-row">
+                <input type="number" v-model.number="initialPayment" min="0" step="1000">
+                <select v-model="currency" disabled style="opacity:0.5;">
+                    <option>{{ currency }}</option>
+                </select>
+            </div>
         </div>
         <div class="form-group">
             <label>Срок кредита</label>
-            <input type="number" v-model.number="srok">
-            <select v-model="srok_ed">
-                <option value="months">Месяцы</option>
-                <option value="years">Годы</option>
-            </select>
+            <div class="input-row">
+                <input type="number" v-model.number="srok" min="1" step="1">
+                <select v-model="srok_ed">
+                    <option value="months">Месяцы</option>
+                    <option value="years">Годы</option>
+                </select>
+            </div>
         </div>
         <div class="form-group">
             <label>Процентная ставка</label>
-            <input type="number" v-model.number="percent">
-            <select v-model="percent_ed">
-                <option value="year">% в год</option>
-                <option value="month">% в месяц</option>
-                <option value="day">% в день</option>
-            </select>
+            <div class="input-row">
+                <input type="number" v-model.number="percent" min="0" step="0.1">
+                <select v-model="percent_ed">
+                    <option value="year">% в год</option>
+                    <option value="month">% в месяц</option>
+                    <option value="day">% в день</option>
+                </select>
+            </div>
         </div>
         <div class="form-group">
             <label>Дополнительные комиссии</label>
-            <input type="number" v-model.number="fees">
+            <div class="input-row">
+                <input type="number" v-model.number="fees" min="0" step="100">
+                <select v-model="currency" disabled style="opacity:0.5;">
+                    <option>{{ currency }}</option>
+                </select>
+            </div>
         </div>
         <div class="form-group">
             <label>Тип платежа</label>
@@ -112,9 +237,55 @@
             </select>
         </div>
         <div class="results">
-            <div class="result-item"><span>Ежемесячный платеж:</span><span>{{ monthlyPayment }} {{ currency }}</span></div>
-            <div class="result-item"><span>Общая сумма выплат:</span><span>{{ totalPayment }} {{ currency }}</span></div>
-            <div class="result-item"><span>Переплата:</span><span>{{ overpay }} {{ currency }}</span></div>
+            <div class="result-item" v-if="paymentType === 'annuity'">
+                <span>Ежемесячный платеж:</span>
+                <span>{{ formatNumber(monthlyPayment) }} {{ currency }}</span>
+            </div>
+            <div class="result-item" v-if="paymentType === 'differentiated'">
+                <span>Первый платеж:</span>
+                <span>{{ formatNumber(firstPayment) }} {{ currency }}</span>
+            </div>
+            <div class="result-item" v-if="paymentType === 'differentiated'">
+                <span>Последний платеж:</span>
+                <span>{{ formatNumber(lastPayment) }} {{ currency }}</span>
+            </div>
+            <div class="result-item">
+                <span>Общая сумма выплат:</span>
+                <span>{{ formatNumber(totalPayment) }} {{ currency }}</span>
+            </div>
+            <div class="result-item">
+                <span>Переплата:</span>
+                <span>{{ formatNumber(overpay) }} {{ currency }}</span>
+            </div>
+        </div>
+        <button class="toggle-btn" @click="showSchedule = !showSchedule">
+            {{ showSchedule ? 'Скрыть график' : 'Показать график платежей' }}
+        </button>
+    </div>
+
+    <div class="schedule-section" v-if="showSchedule">
+        <h3>График платежей</h3>
+        <div class="schedule-table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>№</th>
+                        <th>Платеж</th>
+                        <th>Долг</th>
+                        <th>Проц.</th>
+                        <th>Остаток</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(payment, index) in schedule" :key="index">
+                        <td>{{ payment.month }}</td>
+                        <td><strong>{{ formatNumber(payment.payment) }}</strong></td>
+                        <td>{{ formatNumber(payment.principal) }}</td>
+                        <td>{{ formatNumber(payment.interest) }}</td>
+                        <td>{{ formatNumber(payment.balance) }}</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
@@ -132,42 +303,132 @@
                 srok_ed: 'months',
                 percent_ed: 'year',
                 paymentType: 'annuity',
+                showSchedule: false,
             };
         },
         computed: {
-            monthlyPayment() {
-                let p = this.percent / 100 / 12;
-                let loanAmount = this.summa - this.initialPayment + this.fees;
 
-                if (this.paymentType === 'annuity') {
-                    return ((loanAmount * p) / (1 - Math.pow(1 + p, -this.srok))).toFixed(2);
-                } else {
-
-                    let basePayment = loanAmount / this.srok;
-                    let firstPayment = basePayment + (loanAmount * p);
-                    return firstPayment.toFixed(2);
-                }
+            totalMonths() {
+                return this.srok_ed === 'years' ? this.srok * 12 : this.srok;
             },
-            totalPayment() {
-                let total = 0;
-                let p = this.percent / 100 / 12;
-                let loanAmount = this.summa - this.initialPayment + this.fees;
-                if (this.paymentType === 'annuity') {
-                    total = this.monthlyPayment * this.srok;
-                } else {
-                    let remainingLoan = loanAmount;
-                    for (let i = 0; i < this.srok; i++) {
-                        let interestPayment = remainingLoan * p;
-                        let principalPayment = loanAmount / this.srok;
-                        total += principalPayment + interestPayment;
-                        remainingLoan -= principalPayment;
-                    }
+
+            monthlyRate() {
+                let rate = this.percent / 100;
+                if (this.percent_ed === 'year') {
+                    return rate / 12;
+                } else if (this.percent_ed === 'month') {
+                    return rate;
+                } else if (this.percent_ed === 'day') {
+                    return rate * 30;
                 }
-                return total.toFixed(2);
+                return rate / 12;
+            },
+
+            loanAmount() {
+                return Math.max(0, this.summa - this.initialPayment + this.fees);
+            },
+
+            monthlyPayment() {
+                const n = this.totalMonths;
+                const p = this.monthlyRate;
+                const loan = this.loanAmount;
+                if (n <= 0 || loan <= 0) return 0;
+                if (p === 0) return loan / n;
+                return loan * (p * Math.pow(1 + p, n)) / (Math.pow(1 + p, n) - 1);
+            },
+
+            basePrincipalPayment() {
+                const n = this.totalMonths;
+                const loan = this.loanAmount;
+                if (n <= 0 || loan <= 0) return 0;
+                return loan / n;
+            },
+            firstPayment() {
+                const p = this.monthlyRate;
+                const loan = this.loanAmount;
+                const base = this.basePrincipalPayment;
+                if (base <= 0) return 0;
+                return base + (loan * p);
+            },
+            lastPayment() {
+                const p = this.monthlyRate;
+                const base = this.basePrincipalPayment;
+                if (base <= 0) return 0;
+                return base + (base * p);
+            },
+
+            totalPayment() {
+                const n = this.totalMonths;
+                const p = this.monthlyRate;
+                const loan = this.loanAmount;
+                if (n <= 0 || loan <= 0) return 0;
+                if (this.paymentType === 'annuity') {
+                    return this.monthlyPayment * n;
+                } else {
+                    let total = 0;
+                    let remaining = loan;
+                    const principalPayment = loan / n;
+                    for (let i = 0; i < n; i++) {
+                        total += principalPayment + (remaining * p);
+                        remaining -= principalPayment;
+                    }
+                    return total;
+                }
             },
             overpay() {
-                return (this.totalPayment - (this.summa - this.initialPayment)).toFixed(2);
+                const loan = this.loanAmount;
+                return Math.max(0, this.totalPayment - loan);
             },
+
+            schedule() {
+                const n = this.totalMonths;
+                const p = this.monthlyRate;
+                const loan = this.loanAmount;
+                const schedule = [];
+                if (n <= 0 || loan <= 0) return schedule;
+                let remaining = loan;
+                if (this.paymentType === 'annuity') {
+                    const payment = this.monthlyPayment;
+                    for (let i = 1; i <= n; i++) {
+                        const interestPayment = remaining * p;
+                        const principalPayment = payment - interestPayment;
+                        remaining -= principalPayment;
+                        if (remaining < 0.01) remaining = 0;
+                        schedule.push({
+                            month: i,
+                            payment: payment,
+                            principal: principalPayment,
+                            interest: interestPayment,
+                            balance: remaining
+                        });
+                    }
+                } else {
+                    const principalPayment = loan / n;
+                    for (let i = 1; i <= n; i++) {
+                        const interestPayment = remaining * p;
+                        const payment = principalPayment + interestPayment;
+                        remaining -= principalPayment;
+                        if (remaining < 0.01) remaining = 0;
+                        schedule.push({
+                            month: i,
+                            payment: payment,
+                            principal: principalPayment,
+                            interest: interestPayment,
+                            balance: remaining
+                        });
+                    }
+                }
+                return schedule;
+            }
+        },
+        methods: {
+            formatNumber(num) {
+                if (num === 0 || num === undefined || num === null) return '0.00';
+                return num.toLocaleString('ru-RU', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+            }
         }
     }).mount('#app');
 </script>

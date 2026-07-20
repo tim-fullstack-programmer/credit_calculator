@@ -182,10 +182,10 @@
             <div class="input-row">
                 <input type="number" v-model.number="summa" min="0" step="1000">
                 <select v-model="currency">
-                    <option value="₽">₽</option>
                     <option value="$">$</option>
                     <option value="€">€</option>
                     <option value="£">£</option>
+                    <option value="₽">₽</option>
                     <option value="¥">¥</option>
                 </select>
             </div>
@@ -294,12 +294,12 @@
     Vue.createApp({
         data() {
             return {
-                summa: 100000,
+                summa: 10000,
                 initialPayment: 0,
                 srok: 24,
-                percent: 20,
+                percent: 5,
                 fees: 0,
-                currency: '₽',
+                currency: '$',
                 srok_ed: 'months',
                 percent_ed: 'year',
                 paymentType: 'annuity',

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
-    <title>Кредитный калькулятор</title>
+    <title>Loan Calculator</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
@@ -176,9 +176,9 @@
 <body>
 <div id="app" class="container">
     <div class="calculator">
-        <h2>Кредитный калькулятор</h2>
+        <h2>Loan Calculator</h2>
         <div class="form-group">
-            <label>Сумма кредита</label>
+            <label>Loan Amount</label>
             <div class="input-row">
                 <input type="number" v-model.number="summa" min="0" step="1000">
                 <select v-model="currency">
@@ -191,7 +191,7 @@
             </div>
         </div>
         <div class="form-group">
-            <label>Первоначальный взнос</label>
+            <label>Down Payment</label>
             <div class="input-row">
                 <input type="number" v-model.number="initialPayment" min="0" step="1000">
                 <select v-model="currency" disabled style="opacity:0.5;">
@@ -200,28 +200,28 @@
             </div>
         </div>
         <div class="form-group">
-            <label>Срок кредита</label>
+            <label>Loan Term</label>
             <div class="input-row">
                 <input type="number" v-model.number="srok" min="1" step="1">
                 <select v-model="srok_ed">
-                    <option value="months">Месяцы</option>
-                    <option value="years">Годы</option>
+                    <option value="months">Months</option>
+                    <option value="years">Years</option>
                 </select>
             </div>
         </div>
         <div class="form-group">
-            <label>Процентная ставка</label>
+            <label>Interest Rate</label>
             <div class="input-row">
                 <input type="number" v-model.number="percent" min="0" step="0.1">
                 <select v-model="percent_ed">
-                    <option value="year">% в год</option>
-                    <option value="month">% в месяц</option>
-                    <option value="day">% в день</option>
+                    <option value="year">% per year</option>
+                    <option value="month">% per month</option>
+                    <option value="day">% per day</option>
                 </select>
             </div>
         </div>
         <div class="form-group">
-            <label>Дополнительные комиссии</label>
+            <label>Additional Fees</label>
             <div class="input-row">
                 <input type="number" v-model.number="fees" min="0" step="100">
                 <select v-model="currency" disabled style="opacity:0.5;">
@@ -230,50 +230,50 @@
             </div>
         </div>
         <div class="form-group">
-            <label>Тип платежа</label>
+            <label>Payment Type</label>
             <select v-model="paymentType">
-                <option value="annuity">Аннуитетный</option>
-                <option value="differentiated">Дифференцированный</option>
+                <option value="annuity">Annuity</option>
+                <option value="differentiated">Differentiated</option>
             </select>
         </div>
         <div class="results">
             <div class="result-item" v-if="paymentType === 'annuity'">
-                <span>Ежемесячный платеж:</span>
+                <span>Monthly Payment:</span>
                 <span>{{ formatNumber(monthlyPayment) }} {{ currency }}</span>
             </div>
             <div class="result-item" v-if="paymentType === 'differentiated'">
-                <span>Первый платеж:</span>
+                <span>First Payment:</span>
                 <span>{{ formatNumber(firstPayment) }} {{ currency }}</span>
             </div>
             <div class="result-item" v-if="paymentType === 'differentiated'">
-                <span>Последний платеж:</span>
+                <span>Last Payment:</span>
                 <span>{{ formatNumber(lastPayment) }} {{ currency }}</span>
             </div>
             <div class="result-item">
-                <span>Общая сумма выплат:</span>
+                <span>Total Payment:</span>
                 <span>{{ formatNumber(totalPayment) }} {{ currency }}</span>
             </div>
             <div class="result-item">
-                <span>Переплата:</span>
+                <span>Overpayment:</span>
                 <span>{{ formatNumber(overpay) }} {{ currency }}</span>
             </div>
         </div>
         <button class="toggle-btn" @click="showSchedule = !showSchedule">
-            {{ showSchedule ? 'Скрыть график' : 'Показать график платежей' }}
+            {{ showSchedule ? 'Hide Schedule' : 'Show Payment Schedule' }}
         </button>
     </div>
 
     <div class="schedule-section" v-if="showSchedule">
-        <h3>График платежей</h3>
+        <h3>Payment Schedule</h3>
         <div class="schedule-table-wrapper">
             <table>
                 <thead>
                     <tr>
-                        <th>№</th>
-                        <th>Платеж</th>
-                        <th>Долг</th>
-                        <th>Проц.</th>
-                        <th>Остаток</th>
+                        <th>No.</th>
+                        <th>Payment</th>
+                        <th>Principal</th>
+                        <th>Interest</th>
+                        <th>Balance</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -424,7 +424,7 @@
         methods: {
             formatNumber(num) {
                 if (num === 0 || num === undefined || num === null) return '0.00';
-                return num.toLocaleString('ru-RU', {
+                return num.toLocaleString('en-US', {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2
                 });
